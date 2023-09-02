@@ -1,0 +1,177 @@
+
+- predprocessor directives + conditional compilation
+- C++ has varying size for primitive data types. It depends on the machine you are working on.
+- Look at climits library: #include "climits"
+- {} list initialization is much better as it checks all at compile time
+- C++ won't check that this index is out of bounds for the array. Rewatch 56 lecture 
+sizeof(array = 10 * 4) / sizeof(int = 4) = 10
+10 - 1 => last index 
+- initialization vs assignment
+- ++i is not right to left as with assignment
+- type conversion = type coercion
+- use unsigned integer during looping if you don't need negative numbers
+- lecture 94: cc type functions
+    null chracter is put at the end of the string for us by C++ ("Some string\0"), so length is increased by 1
+    char my_name[7] {"some string with 7"}  if we allocate n - number of characters for string and put only n - 2 -> all further will be populated with \0 aka null
+    cctype for testing strings, cstring for working with strings, cstdlib for converting
+- with C++ style strings we can make assignment while with C style strings - no 
+- C style strings can't be concatenated by +. Only mix of C++ and C style strings
+- actual parameters vs formal parameters: former is arguments and latter is just parameters
+- in C++ by default you make a pass-by-value to the functions
+- what we pass array to another function, it is not a copy of the array, but address of the first element => we need to provide size of the array as well
+  but it is still pass by value, because we copy first value, though it is an address
+	const in parameters prevent this variable from being modified
+- but vector is pass by value completely. Also we can use const to prevent program from changing it
+- pass by reference avoids the copying, hence saves resources
+- static variables preveserve their values between function calls
+- stack frame or activation records: collection of info about active func (params, local vars, return address)
+- lecture 111: about call stack
+- inline functions in C++
+- pointers: variable whose value is an address. Always initialize pointer. For example, to point to nowhere (nullptr)
+- all pointers have the same size. Don't confuse size of the pointer and size of what it points to
+- there are types and untyped pointers. Mostly in C++ typed are used
+- lecture 119: about pointers. If we reference (&) pointer, but want ti display the value of what pointer points to - use * on the pointer
+	accessing value of what pointer references to: dereference
+- constants and pointers:
+   pointers to constants
+   constant pointers
+   constant pointers to constants
+- never return pointer to a local variable: https://stackoverflow.com/a/10696038/16543524
+- Reference:
+    reference to a variable
+    must be initialized when variable is declared
+    cannot be null
+    once initialized cannot be changed to refer to a different variable
+    very useful as function params
+    constant pointer that is automatically dereferenced  
+- IMPORTANT: use reference based for-loops if you don't need to change the variable. It will make the code much more efficient 
+   for (auto st : stooges) - it makes a copy of the object on each iteration
+- 131 lecture: rules about pointers and references
+- 2 ways to make class specification:
+	first way:
+	#ifndef _ACCOUNT_H_
+	#define _ACCOUNT_H_
+	class ...
+	#endif
+	
+	second way:
+	#pragma once
+
+- include with <> tells the compiler that it is a system header files. Include with "" tells the compiler to include header files that a local to this project
+- const after method signature - to prevent method from changing the data inside the method itself
+- if no constructors or destructors provided - C++ will create those automatically
+	Destructors are called in reverse order from what is Constructor called
+	Best practice - have its own No Args Constrcutor where default values are put (otherwise C++ will create of its own). Moreover, if there is some constructor, then
+		C++ won't generate NoArgs constructor for us. We need to do this by ourselves => without NoArgs we can't create objects without providing params (if such exist) 
+ 
+- Using {} after class name is assignment, not true initialization. True initialization is done with :
+	Example below. If done with {} assignment, then DEFAULT_VALUE will be assigned. If done with : - not assigned 
+	private:
+    	    string name{"DEFAULT_VALUE"};
+    	    int health;
+   	    int xp
+
+- delegating constructors only work in constructor initialization list 
+- default values in constructor are taken from prototype. So, when you visit constructor initialization list, default values (if nothing is provided on their place)
+	will be taken from the prototype
+
+- C++ has its own Copy Constructor which is used: a) pass-by-value b) return from func as a value c) new object is created based on the old one
+    - If raw pointer is used - only pointer is copied, not the data it is pointing to (shallow copy) => provide copy constructor in such cases
+    - use `const reference parameter` ClassName(const ClassName &variable)
+    - don't forget that Copy Constructor will be called when object is passed to func (pass-by-value) and Destructor will be called when func is ended
+    - C++ has its own copy constructor (like default NoArgs) which does memner wise copying of the object. Also C++ has default Destructor
+- We can use delegating constructors in Copy Constructors as well
+
+- If constructor uses pointer and does shallow copying - very bad. When copy is created (i.e. inside method), then when destructor is called - memory is released, hence
+	pointer is deleted as well. But in initial object pointer is still present - it points to non-valid memory
+- Deep copy - creates copy of the pointed-to-data. Each copy will have a pointer to the unique storage in the heap
+- L-value: when you can refer to an object by name or follow a pointer to get to an object => addressable hence L-value
+- R-value: refer to temporary objects that are created by the compiler and then discarded. BUT it is an overhead with complex obejcts and if it also has raw pointers
+- Move semantics addresses R-values
+    Copy elision - C++ may optimize copy constructors
+    R-value references are references to those temporary objects. They are declared using 2 &&
+    Move semantics is all about R-value references
+    R-value references are used by move constructor and move assignment operator to efficiently move an object rather than copying it
+- Move constructor: similar to shallow copy, but it nulls the data in the first object, so only second object has pointer to the data
+- C++ wll call Move contructor if you write it and use temp value (i.e. when pushing to stack you create object on the fly)
+
+- const in methods allow to call the method on the const object (ohterwise compiler will give an error). So, we tell the compiler that object won't be modified inside the method
+- In C++ classes by default have private access modifier. Struct has public by default
+
+- Operator overloading in C++. I.e. +-*/ can work with double, int etc
+    - the only operator the compiler provides default implementation for - assignment operator. All other operators that can be overloaded must be explicitly defined by the programmer
+    - overload only those operators that make sense for your classes
+    - operators that can't be overloaded: ::, :?, .*, ., sizeof (159 lecture, 3rd minute)
+- Default assignment operator in C++ - shallow copy in a memberwise fashion. And it is okay in most cases + if you don't have raw pointers
+    - MyString &operator=(const MyString &rhs); // Copy assignment - it is not a constructor, but an assignment, because left side already exists
+    - b = "This is a test"; will call a constructor at first and then operator=
+    - if we don't provide move constructor operator - C++ will use copy constructor by default + recall that with pointers it is better to provide move assignment operator
+    - MyString a{"Hello"};
+      a = MyString{"Hola"}; - this is an assignment, not initialization because `a` already exists. Without Move constructor at first it will use Copy Constructor (after using ordinary constructor to create an object) 
+    - In Move Constructors at first real constructor still will be called to create an object, but then not Copy Constructor - Move Constructor will be called
+- Member methods and global functions
+    - Unary: operator- const; operator++; operator++(int); operator!() const
+    - limitation: object on the left-hand side must be an object of the class you're using
+    - but with global functions it can be on any side. So, this becomes helpful when we want to overload cout/cin etc
+- Default access-specifier for inheritance - private. 3 types are: public, private, protected
+- protected is not accessible, as private, on the object which instantiates the class. But it is do accessible inside parent class and child classes
+- Child constructor executes only after Parent constructor. In Desctructors - the other way round
+- Constructors are not inherited. So, if you have constructor with parameter in Base class, then Derived must have it as well if you want to initialize it with variable 
+- class Base {
+private:
+    int value;
+public:
+    Base() : value{0} {
+        std::cout << "Base no-args constructor" << std::endl;
+    }
+
+    Base(int x) : value{x} {
+        std::cout << "Base (int) overloaded constructor" << std::endl;
+    }
+
+    ~Base() {
+        std::cout << "Base destructor" << std::endl;
+    }
+};
+
+class Derived : public Base {
+private:
+    int doubled_value;
+
+public:
+    Derived() : doubled_value{21} {
+        std::cout << "Derived no-args overloaded constructor" << std::endl;
+    }
+
+    Derived(int val) : doubled_value{val} {
+        std::cout << "Derived no-args overloaded constructor" << std::endl;
+    };
+}; - If Derived is initialized with value, then still NoArgs of Base will be called. If we want to call constructor with arguments - need to explicitly call it
+
+- We can use `using Base::Base` to inherit non-special constructors in the Child class. Hence, this way we can skip defining like Derived(int val) constructors. But value
+	gets assigned to the Parent attributes, not child ones, by default. So, it's our responsibility to deal with Derived class
+
+- If we want in Child constructor to call concrete Parent constructor, then:
+Derived(int val) : Base(val), doubled_value{val} {
+        std::cout << "Derived no-args overloaded constructor" << std::endl;
+    };
+
+- In Copy Constructor inheritance when we put object of inherited type to the Base class constructor compiler will use `slicing` to take Parent type from the Base type
+- If Move/Copy constructors/assignments are not defined in Child class - compiler will generate automatically and call Parent
+  If user defines Copy/Move constructors/assignments - user must call parent constructor/assignment
+
+- By default C++ uses static binding
+
+- Rules for dynamic polymoprism:
+	- inheritance
+	- base class pointer/base class reference
+	- virtual functions
+
+- Virtual functions are Dynamically bound only when called via Base class reference or pointer 
+- virtual keyword must be put in Base class. In Derived - not required, but best practice
+- If a class is deleted via Base class pointer and class doesn't have virtual destructor - all possible problems can happen
+- If class has a virtual function, then it also must have virtual destructor. Though virtual Destructor is required only for Base class. All the children will inherit it
+- If you use ordinary Destructor for class with virtual functions - delete on children will trigger Base class only
+- Add override keyword in Derived class (from C++ 11) which will ensure that this method overrides. So, it ensures dynamic binding, because if we miss something
+    in signature, then this method will be statically binded, hence no polymorphism and if we call this method on Base *p = new Derived;, then it will call Base class
+- So, if miss something in Derived method, it gets redefined, not overriden. This is static binding    
